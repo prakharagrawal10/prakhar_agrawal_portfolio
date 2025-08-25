@@ -16,6 +16,17 @@ export default function Home() {
               builds reliable, maintainable web apps and ML prototypes. I focus on
               clean code, simple UX and measurable results.
             </p>
+            <div className={styles.socials}>
+              <a href="https://github.com/" target="_blank" rel="noreferrer">GitHub</a>
+              <a href="https://linkedin.com/" target="_blank" rel="noreferrer">LinkedIn</a>
+              <a href="mailto:you@example.com">Email</a>
+            </div>
+
+            <div className={styles.statsRow}>
+              <div className={styles.stat}><strong>6</strong><span>Projects</span></div>
+              <div className={styles.stat}><strong>2</strong><span>Internships</span></div>
+              <div className={styles.stat}><strong>3</strong><span>Languages</span></div>
+            </div>
             <div className={styles.ctaRow}>
               <Link to="/projects" className={styles.ctaPrimary}>
                 View Projects
@@ -35,6 +46,26 @@ export default function Home() {
           </div>
         </div>
       </header>
+
+      <section className={`${styles.section} ${styles.featureSection}`}>
+        <h2 className={styles.sectionTitle}>Featured project</h2>
+        <div className={styles.featuredCard}>
+          <div className={styles.featureMedia}>
+            <img src="/src/assets/images/hero.jpg" alt="featured" />
+          </div>
+          <div className={styles.featureBody}>
+            <h3>FarmWise — Soil Nutrient Predictor</h3>
+            <p>
+              Deployed ML model as a Flask API, integrated with a React frontend. Uses
+              data pipelines for preprocessing and a lightweight CNN for feature extraction.
+            </p>
+            <div className={styles.featureLinks}>
+              <Link to="/projects" className={styles.cardLink}>Read more</Link>
+              <a href="#" className={styles.cardLink}>Live</a>
+            </div>
+          </div>
+        </div>
+      </section>
 
   <section className={`${styles.section} ${styles.enterUpDelay}`}>
         <h2 className={styles.sectionTitle}>Selected skills</h2>
