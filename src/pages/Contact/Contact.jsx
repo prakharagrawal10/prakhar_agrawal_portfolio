@@ -189,7 +189,7 @@ export default function Contact() {
                   <div>
                     <h3 className="font-semibold">Resume</h3>
                     <a
-                      href="/PrakharAgrawal_Resume (1).pdf"
+                      href="/Resume_Prakhar_Agrawal.pdf"
                       download
                       className="text-gray-400 hover:underline"
                       target="_blank"
