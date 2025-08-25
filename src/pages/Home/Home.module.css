@@ -2,7 +2,7 @@
 .page{background:var(--bg);color:#f8fafc;min-height:100vh;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial}
 .page{position:relative;overflow:hidden}
 .page > canvas{z-index:0}
-.page > *{position:relative;z-index:1}
+.page > *{position:relative;z-index:2}
 .hero{padding:80px 20px}
 .heroInner{max-width:1200px;margin:0 auto;display:flex;gap:36px;align-items:center}
 .heroText{flex:1}
@@ -10,12 +10,18 @@
 .lead{color:var(--muted);margin:0 0 20px;max-width:56ch}
 .ctaRow{display:flex;gap:12px}
 .socials{display:flex;gap:12px;margin-bottom:14px}
-.socials a{color:var(--muted);text-decoration:none;border-bottom:1px dashed rgba(255,255,255,0.04);padding-bottom:2px}
-.socialIcon{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,0.02);color:var(--muted);transition:transform 180ms ease,background 180ms ease}
-.socialIcon:hover{transform:translateY(-4px);background:rgba(255,255,255,0.035);color:#fff}
+.socials a{color:var(--muted);text-decoration:none;padding-bottom:2px}
+.socialIcon{display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:12px;background:rgba(255,255,255,0.02);color:var(--muted);transition:transform 180ms ease,box-shadow 180ms ease}
+.socialIcon:hover{transform:translateY(-6px);box-shadow:0 12px 40px rgba(2,6,23,0.6)}
+.socialGit{background:linear-gradient(180deg,#0f1724,#111827);color:#fff}
+.socialLinked{background:linear-gradient(180deg,#0a66c2,#0a58a8);color:#fff}
+.socialMail{background:linear-gradient(180deg,#ff6b6b,#ff3b3b);color:#fff}
+.socialSvg{width:36px;height:36px;display:block;filter:none;transition:transform 220ms ease,filter 220ms ease}
+.socialIcon:hover .socialSvg{transform:scale(1.12);filter:drop-shadow(0 12px 30px rgba(122,92,255,0.28))}
 .statsRow{display:flex;gap:12px;margin-bottom:18px}
-.stat{background:rgba(255,255,255,0.02);padding:8px 12px;border-radius:8px;text-align:center}
-.stat strong{display:block;font-size:16px}
+.stat{background:rgba(255,255,255,0.02);padding:14px 18px;border-radius:10px;text-align:center;min-width:110px}
+.stat strong{display:block;font-size:34px;line-height:1}
+.stat span{display:block;margin-top:6px;font-size:16px;color:var(--muted)}
 .ctaPrimary{background:var(--accent);color:#041014;padding:10px 16px;border-radius:8px;text-decoration:none;font-weight:600}
 .ctaGhost{border:1px solid rgba(255,255,255,0.08);color:#e6eef3;padding:10px 16px;border-radius:8px;text-decoration:none}
 .heroMedia{width:360px;flex-shrink:0}
@@ -38,17 +44,181 @@
 /* make cards slightly float on hover */
 .card{transition:transform 260ms ease,box-shadow 260ms ease}
 .card:hover{transform:translateY(-6px);box-shadow:0 10px 30px rgba(2,6,23,0.6)}
-.section{padding:64px 20px}
-.sectionAlt{background:rgba(255,255,255,0.02);padding:64px 20px}
-.sectionTitle{font-size:20px;margin:0 0 16px}
+.section{padding:48px 20px}
+.section{
+	padding:48px 20px;
+	background: rgba(2,6,23,0.45); /* slight dark surface so text reads */
+	backdrop-filter: blur(6px);
+	-webkit-backdrop-filter: blur(6px);
+	border-radius:10px;
+	margin:18px 12px;
+}
+.highlightsSection {
+	background: linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.12));
+	backdrop-filter: blur(8px);
+}
+
+.highlightsGrid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: 18px;
+	margin-top: 18px;
+}
+
+.highlightCard {
+	background: rgba(10,12,15,0.6);
+	color: #e6eef8;
+	padding: 18px;
+	border-radius: 10px;
+	box-shadow: 0 6px 16px rgba(0,0,0,0.45);
+	transition: transform 220ms ease, box-shadow 220ms ease;
+}
+
+.highlightCard:hover {
+	transform: translateY(-6px);
+	box-shadow: 0 20px 36px rgba(2,6,23,0.6);
+}
+
+.techSection {
+	padding-top: 28px;
+}
+
+.techRow {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-top: 12px;
+}
+
+.techBadge {
+	background: linear-gradient(90deg,#6bffb8,#7a5cff);
+	color: #06121a;
+	padding: 8px 12px;
+	border-radius: 999px;
+	font-weight: 600;
+	box-shadow: 0 6px 18px rgba(106,90,255,0.12);
+}
+
+.ctaBanner {
+	margin-top: 22px;
+	padding: 28px 20px;
+}
+
+.ctaInner {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	background: linear-gradient(90deg, rgba(8,10,14,0.55), rgba(14,16,22,0.4));
+	padding: 18px;
+	border-radius: 12px;
+	box-shadow: 0 10px 32px rgba(0,0,0,0.45);
+}
+
+.ctaPrimary {
+	display: inline-block;
+	background: #7a5cff;
+	color: #fff;
+	padding: 10px 14px;
+	border-radius: 8px;
+	font-weight: 700;
+	text-decoration: none;
+}
+.skillCloudWrap {
+	position: relative;
+	width: 100%;
+	max-width: 620px; /* larger so the cloud is far bigger */
+	margin: 6px 0 6px 0; /* align to left */
+	height: 260px; /* taller area */
+	pointer-events: auto;
+}
+
+.skillLeftWrap {
+	display: block;
+	margin-top: 12px;
+	margin-left: 2px;
+}
+
+.skillCloud {
+	position: absolute;
+	inset: 0;
+}
+
+.iconBubble {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	width: 72px;
+	height: 72px;
+	border-radius: 999px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	color: #071428;
+	background: linear-gradient(135deg, rgba(122,92,255,0.98), rgba(107,255,184,0.98));
+	box-shadow: 0 20px 46px rgba(58,44,79,0.42);
+	transition: transform 220ms ease, box-shadow 220ms ease;
+}
+
+.typingLabel {
+	position: absolute;
+	left: 12px; /* move the typing label to the left */
+	bottom: -6px;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	color: #dff6ff;
+	font-weight: 700;
+	font-size: 36px; /* very large */
+	text-shadow: 0 6px 18px rgba(2,6,23,0.7);
+	font-family: 'Times New Roman', Times, Georgia, serif;
+	text-transform: uppercase;
+}
+
+.typingText {
+	min-width: 180px;
+	display: inline-block;
+	font-size: 40px; /* very large typed text */
+	letter-spacing: 1.6px;
+	text-transform: uppercase;
+}
+
+.cursor {
+	opacity: 1;
+	animation: blink 900ms steps(1) infinite;
+}
+
+@keyframes blink {
+	0% { opacity: 1 }
+	50% { opacity: 0 }
+	100% { opacity: 1 }
+}
+
+/* Responsive: scale down the typing label on small screens */
+@media (max-width: 720px) {
+	.typingLabel { font-size: 16px; }
+	.typingText { font-size: 18px; min-width: 80px; }
+	.skillCloudWrap { max-width: 320px; height: 140px; }
+	.iconBubble { width: 48px; height: 48px; }
+}
+.sectionAlt{
+	padding:48px 20px;
+	background: rgba(2,6,23,0.38);
+	backdrop-filter: blur(6px);
+	-webkit-backdrop-filter: blur(6px);
+	border-radius:10px;
+	margin:18px 12px;
+}
+.sectionTitle{font-size:20px;margin:0 0 16px;text-shadow:0 2px 8px rgba(0,0,0,0.6)}
 .skillsGrid{display:flex;flex-wrap:wrap;gap:10px;list-style:none;padding:0;margin:0}
-.skill{background:rgba(255,255,255,0.03);padding:8px 12px;border-radius:999px;font-weight:600}
+.skill{background:rgba(255,255,255,0.03);padding:8px 12px;border-radius:999px;font-weight:600;text-shadow:0 1px 2px rgba(0,0,0,0.6)}
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
-.card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));padding:18px;border-radius:12px}
-.cardText{color:var(--muted);margin:8px 0}
-.cardLink{text-decoration:none;color:var(--accent);font-weight:600}
+.card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));padding:18px;border-radius:12px;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.cardText{color:var(--muted);margin:8px 0;text-shadow:0 1px 2px rgba(0,0,0,0.6)}
+.cardLink{text-decoration:none;color:var(--accent);font-weight:600;text-shadow:0 1px 2px rgba(0,0,0,0.5)}
 .testimonials{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.testimonial{background:rgba(255,255,255,0.02);padding:18px;border-radius:12px}
+.testimonial{background:rgba(255,255,255,0.02);padding:18px;border-radius:12px;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
 
 /* Featured project */
 .featureSection{padding-top:12px}
@@ -58,6 +228,8 @@
 .featureLinks{display:flex;gap:12px;margin-top:8px}
 .featureLinks a{color:var(--accent);font-weight:600;text-decoration:none}
 
+.media-darken{background:linear-gradient(180deg,rgba(2,6,23,0.35),transparent)}
 @media(max-width:800px){.heroInner{flex-direction:column}.heroMedia{width:100%}}
+.title,.lead{ text-shadow: 0 2px 8px rgba(0,0,0,0.6)}
 .featureMedia{flex-shrink:0}
 .featuredCard:hover{transform:translateY(-6px);transition:transform 260ms ease}

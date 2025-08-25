@@ -12,34 +12,41 @@ export default function InteractiveBackground() {
     let w = (canvas.width = window.innerWidth);
     let h = (canvas.height = window.innerHeight);
 
-    const pointer = { x: w / 2, y: h / 2, active: false };
+  const pointer = { x: w / 2, y: h / 2, active: false };
 
-    const particles = [];
-    const BASE_COUNT = Math.max(30, Math.floor((w * h) / 140000));
-    let PARTICLE_COUNT = BASE_COUNT;
+    // Nodes will look like small chips; traces connect nearby nodes
+  const nodes = [];
+  const pulses = []; // animated signals running along traces
+
+  // cursor trail (lagging neon orb and trail)
+  const cursorTrail = [];
+  const TRAIL_LEN = 10;
+  for (let i = 0; i < TRAIL_LEN; i++) cursorTrail.push({ x: w / 2, y: h / 2 });
+
+    const BASE_NODES = Math.max(24, Math.floor((w * h) / 220000));
 
     function rand(min, max) {
       return Math.random() * (max - min) + min;
     }
 
-    function makeParticle() {
+    function makeNode() {
       return {
         x: Math.random() * w,
         y: Math.random() * h,
-        vx: rand(-0.4, 0.4),
-        vy: rand(-0.4, 0.4),
-        r: rand(0.8, 3.2),
-        hue: Math.floor(rand(170, 210)),
+        vx: rand(-0.25, 0.25),
+        vy: rand(-0.25, 0.25),
+        size: rand(6, 14),
+        hue: 190 + Math.floor(rand(-8, 8)),
       };
     }
 
-    for (let i = 0; i < PARTICLE_COUNT; i++) particles.push(makeParticle());
+    for (let i = 0; i < BASE_NODES; i++) nodes.push(makeNode());
 
     function resize() {
       w = canvas.width = window.innerWidth;
       h = canvas.height = window.innerHeight;
-      PARTICLE_COUNT = Math.max(20, Math.floor((w * h) / 140000));
-      while (particles.length < PARTICLE_COUNT) particles.push(makeParticle());
+      const desired = Math.max(18, Math.floor((w * h) / 220000));
+      while (nodes.length < desired) nodes.push(makeNode());
     }
 
     function onMove(e) {
@@ -57,20 +64,28 @@ export default function InteractiveBackground() {
     }
 
     function onClick(e) {
-      // burst: create a handful of temporary particles
+      // create a pulse traveling between two nearby nodes (or from click to center)
       const x = e.clientX || (e.touches && e.touches[0] && e.touches[0].clientX) || w / 2;
       const y = e.clientY || (e.touches && e.touches[0] && e.touches[0].clientY) || h / 2;
-      for (let i = 0; i < 10; i++) {
-        const p = makeParticle();
-        p.x = x + rand(-8, 8);
-        p.y = y + rand(-8, 8);
-        p.vx = rand(-3, 3);
-        p.vy = rand(-3, 3);
-        p.r = rand(1.2, 4.5);
-        particles.push(p);
+      // find nearest node
+      let nearest = null;
+      let nd = Infinity;
+      for (const n of nodes) {
+        const dx = n.x - x;
+        const dy = n.y - y;
+        const d = dx * dx + dy * dy;
+        if (d < nd) {
+          nd = d;
+          nearest = n;
+        }
       }
-      // trim if too many
-      if (particles.length > PARTICLE_COUNT * 2) particles.splice(0, particles.length - PARTICLE_COUNT);
+      if (!nearest) return;
+      // pick a partner node within range
+      const partners = nodes.filter((n) => n !== nearest && Math.hypot(n.x - nearest.x, n.y - nearest.y) < 260);
+      const target = partners.length ? partners[Math.floor(Math.random() * partners.length)] : { x: w / 2, y: h / 2 };
+      pulses.push({ sx: nearest.x, sy: nearest.y, ex: target.x, ey: target.y, t: 0, speed: rand(0.01, 0.03) });
+      // limit pulses
+      if (pulses.length > 24) pulses.shift();
     }
 
     window.addEventListener("mousemove", onMove);
@@ -80,104 +95,218 @@ export default function InteractiveBackground() {
     window.addEventListener("click", onClick);
     window.addEventListener("touchstart", onClick);
 
-    // subtle noise function for drifting velocities
-    function noise(n) {
-      return Math.sin(n * 12.9898) * 43758.5453 - Math.floor(Math.sin(n * 12.9898) * 43758.5453);
+    // draw subtle tech grid
+    function drawGrid() {
+      ctx.save();
+      ctx.strokeStyle = "rgba(140,110,200,0.018)"; /* more subtle purple-tint grid */
+      ctx.lineWidth = 1;
+      const gap = Math.max(40, Math.floor(Math.min(w, h) / 18));
+      for (let x = 0; x < w; x += gap) {
+        ctx.beginPath();
+        ctx.moveTo(x + 0.5, 0);
+        ctx.lineTo(x + 0.5, h);
+        ctx.stroke();
+      }
+  for (let y = 0; y < h; y += gap) {
+        ctx.beginPath();
+        ctx.moveTo(0, y + 0.5);
+        ctx.lineTo(w, y + 0.5);
+        ctx.stroke();
+      }
+      ctx.restore();
     }
 
-    let t = 0;
+    // render a node as a small chip (square with inner rectangle and glow)
+    function drawNode(n) {
+      const x = n.x;
+      const y = n.y;
+      const s = Math.max(4, n.size);
+
+  // glow
+      ctx.save();
+      ctx.globalCompositeOperation = "lighter";
+      const g = ctx.createRadialGradient(x, y, 0, x, y, s * 6);
+  g.addColorStop(0, `rgba(155,92,255,0.08)`); // purple core
+  g.addColorStop(0.35, `rgba(46,230,167,0.05)`); // green wash
+  g.addColorStop(0.7, `rgba(20,24,40,0.03)`);
+      g.addColorStop(1, `rgba(2,6,23,0)`);
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(x, y, s * 6, 0, Math.PI * 2);
+      ctx.fill();
+
+      // chip body (rounded square)
+  ctx.globalCompositeOperation = "source-over";
+  ctx.fillStyle = `rgba(110,60,200,0.04)`; /* muted purple (subtle) */
+      roundRect(ctx, x - s, y - s, s * 2, s * 2, 3);
+      ctx.fill();
+
+      // inner core
+  ctx.fillStyle = `rgba(155,92,255,0.9)`;
+      roundRect(ctx, x - s * 0.6, y - s * 0.6, s * 1.2, s * 1.2, 2);
+      ctx.fill();
+
+      // tiny pin marks
+      ctx.fillStyle = `rgba(255,255,255,0.06)`;
+      ctx.fillRect(x - s + 2, y - s + 2, 2, 2);
+      ctx.fillRect(x + s - 4, y + s - 4, 2, 2);
+      ctx.restore();
+    }
+
+    function roundRect(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+    }
 
     function step() {
-      t += 0.005;
-
-      // draw faded background to create trails
-      ctx.globalCompositeOperation = "source-over";
-      ctx.fillStyle = "rgba(2,6,23,0.24)";
+      // fade background slightly for subtle trails
+  ctx.globalCompositeOperation = "source-over";
+  // much lower background alpha so page text clearly stands out
+  ctx.fillStyle = "rgba(2,6,23,0.06)";
       ctx.fillRect(0, 0, w, h);
 
-      // subtle ambient gradient
+      // ambient gradient wash
       const g = ctx.createLinearGradient(0, 0, w, h);
-      g.addColorStop(0, "rgba(6,182,212,0.03)");
-      g.addColorStop(1, "rgba(30,41,59,0.05)");
+      g.addColorStop(0, "rgba(6,182,212,0.02)");
+      g.addColorStop(1, "rgba(3,10,20,0.06)");
       ctx.fillStyle = g;
       ctx.fillRect(0, 0, w, h);
 
-      // update and draw particles
-      for (let i = 0; i < particles.length; i++) {
-        const p = particles[i];
+      // grid
+      drawGrid();
 
-        // slow drift from noise
-        p.vx += (noise(p.x * 0.01 + t) - 0.5) * 0.02;
-        p.vy += (noise(p.y * 0.01 + t + 5) - 0.5) * 0.02;
+      // update nodes
+      for (let i = 0; i < nodes.length; i++) {
+        const n = nodes[i];
+        // gentle drift
+        n.vx += (Math.sin((n.x + n.y) * 0.0005) - 0.5) * 0.02;
+        n.vy += (Math.cos((n.x - n.y) * 0.0004) - 0.5) * 0.02;
 
-        // pointer repulsion/attraction (soft)
+        // pointer influence: attract slightly so nodes cluster near cursor
         if (pointer.active) {
-          const dx = p.x - pointer.x;
-          const dy = p.y - pointer.y;
+          const dx = pointer.x - n.x;
+          const dy = pointer.y - n.y;
           const dist = Math.sqrt(dx * dx + dy * dy) + 0.001;
-          const reach = 180;
+          const reach = 260;
           if (dist < reach) {
-            const force = (1 - dist / reach) * 0.9;
-            p.vx += (dx / dist) * force * 0.6;
-            p.vy += (dy / dist) * force * 0.6;
-          } else {
-            // gentle pull toward center to keep field cohesive
-            p.vx += (w / 2 - p.x) * 0.00002;
-            p.vy += (h / 2 - p.y) * 0.00002;
+            const pull = (1 - dist / reach) * 0.06;
+            n.vx += (dx / dist) * pull;
+            n.vy += (dy / dist) * pull;
           }
         }
 
-        p.x += p.vx;
-        p.y += p.vy;
+        n.x += n.vx;
+        n.y += n.vy;
 
-        // wrap
-        if (p.x < -10) p.x = w + 10;
-        if (p.x > w + 10) p.x = -10;
-        if (p.y < -10) p.y = h + 10;
-        if (p.y > h + 10) p.y = -10;
+        // gentle bounds wrap
+        if (n.x < -20) n.x = w + 20;
+        if (n.x > w + 20) n.x = -20;
+        if (n.y < -20) n.y = h + 20;
+        if (n.y > h + 20) n.y = -20;
 
         // damping
-        p.vx *= 0.98;
-        p.vy *= 0.98;
-
-        // additive glow
-        ctx.globalCompositeOperation = "lighter";
-        ctx.beginPath();
-        const alpha = Math.max(0.03, Math.min(0.22, (p.r / 4) * 0.12 + 0.02));
-        ctx.fillStyle = `hsla(${p.hue}, 90%, 60%, ${alpha})`;
-        ctx.arc(p.x, p.y, p.r * 1.8, 0, Math.PI * 2);
-        ctx.fill();
+        n.vx *= 0.94;
+        n.vy *= 0.94;
       }
 
-      // nearest-neighbor lines (limit checks for perf)
-      ctx.globalCompositeOperation = "source-over";
-      ctx.lineWidth = 0.6;
-      let maxNeighbors = 3;
-      for (let i = 0; i < particles.length; i++) {
-        const a = particles[i];
-        // find a few closest neighbors
-        const neighbors = [];
-        for (let j = 0; j < particles.length; j++) {
-          if (i === j) continue;
-          const b = particles[j];
+  // draw traces (nearest 2 neighbors) to resemble PCB traces
+      ctx.lineWidth = 1.0;
+      for (let i = 0; i < nodes.length; i++) {
+        const a = nodes[i];
+        // find neighbors (cheap: sample next N indices to limit cost)
+        for (let j = i + 1; j < Math.min(nodes.length, i + 8); j++) {
+          const b = nodes[j];
           const dx = a.x - b.x;
           const dy = a.y - b.y;
           const d2 = dx * dx + dy * dy;
-          neighbors.push({ d2, b });
-        }
-        neighbors.sort((x, y) => x.d2 - y.d2);
-        for (let k = 0; k < Math.min(maxNeighbors, neighbors.length); k++) {
-          const b = neighbors[k].b;
-          const d2 = neighbors[k].d2;
-          if (d2 > 1600) continue;
-          const alpha = 0.12 * (1 - d2 / 1600);
-          ctx.strokeStyle = `rgba(100,200,220,${alpha})`;
-          ctx.beginPath();
-          ctx.moveTo(a.x, a.y);
-          ctx.lineTo(b.x, b.y);
-          ctx.stroke();
+          if (d2 < 90000) {
+            const alpha = 0.04 * (1 - d2 / 90000);
+            // blend purple/green along traces by using gradient stroke
+            const traceG = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
+            traceG.addColorStop(0, `rgba(155,92,255,${alpha})`);
+            traceG.addColorStop(1, `rgba(46,230,167,${alpha * 0.9})`);
+            ctx.strokeStyle = traceG;
+            ctx.beginPath();
+            // draw a slightly curved trace
+            const mx = (a.x + b.x) / 2 + (Math.sin((a.x + b.x) * 0.001 + (a.y + b.y) * 0.001) * 8);
+            ctx.moveTo(a.x, a.y);
+            ctx.quadraticCurveTo(mx, (a.y + b.y) / 2, b.x, b.y);
+            ctx.stroke();
+          }
         }
       }
+
+      // draw nodes on top
+      for (let i = 0; i < nodes.length; i++) drawNode(nodes[i]);
+
+      // update and draw pulses
+      for (let p = 0; p < pulses.length; p++) {
+        const pulse = pulses[p];
+        pulse.t += pulse.speed;
+        if (pulse.t > 1) {
+          pulses.splice(p, 1);
+          p--;
+          continue;
+        }
+        const x = pulse.sx + (pulse.ex - pulse.sx) * pulse.t;
+        const y = pulse.sy + (pulse.ey - pulse.sy) * pulse.t;
+        ctx.beginPath();
+        const pulseAlpha = 0.9 * (1 - Math.abs(0.5 - pulse.t) * 2);
+        const pg = ctx.createRadialGradient(x, y, 0, x, y, 12);
+        pg.addColorStop(0, `rgba(155,92,255,${pulseAlpha})`);
+        pg.addColorStop(0.5, `rgba(46,230,167,${pulseAlpha * 0.6})`);
+        pg.addColorStop(1, `rgba(2,6,23,0)`);
+        ctx.fillStyle = pg;
+        ctx.arc(x, y, 4.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // update cursor trail positions (smooth lerp)
+      const lerp = 0.22;
+      for (let i = 0; i < cursorTrail.length; i++) {
+        const t = cursorTrail[i];
+        // target is pointer for first, else previous trail point
+        const target = i === 0 ? pointer : cursorTrail[i - 1];
+        t.x += (target.x - t.x) * lerp;
+        t.y += (target.y - t.y) * lerp;
+      }
+
+      // draw cursor trail (glowing line)
+      ctx.save();
+      for (let i = cursorTrail.length - 1; i >= 0; i--) {
+        const p = cursorTrail[i];
+        const alpha = (i + 1) / cursorTrail.length * (pointer.active ? 0.9 : 0.12);
+        const size = 8 * (1 + i * 0.06);
+        const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, size * 1.8);
+        grad.addColorStop(0, `rgba(155,92,255,${0.8 * alpha})`);
+        grad.addColorStop(0.45, `rgba(46,230,167,${0.45 * alpha})`);
+        grad.addColorStop(1, `rgba(2,6,23,0)`);
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, size * 0.45, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      // connecting stroke for trailing path
+      ctx.beginPath();
+      for (let i = 0; i < cursorTrail.length - 1; i++) {
+        const a = cursorTrail[i];
+        const b = cursorTrail[i + 1];
+        const alpha = 0.32 * (1 - i / cursorTrail.length);
+        const gline = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
+        gline.addColorStop(0, `rgba(155,92,255,${alpha})`);
+        gline.addColorStop(1, `rgba(46,230,167,${alpha * 0.9})`);
+        ctx.strokeStyle = gline;
+        ctx.lineWidth = 2 * (1 - i / cursorTrail.length);
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.stroke();
+      }
+      ctx.restore();
 
       rafRef.current = requestAnimationFrame(step);
     }

@@ -4,7 +4,10 @@ import styles from "./Home.module.css";
 import InteractiveBackground from "../../components/InteractiveBackground";
 import heroImg from "../../assets/images/hero.jpg";
 import { motion } from "framer-motion";
-import { FaGithub, FaLinkedin, FaEnvelope } from "react-icons/fa";
+import GitHubSVG from "../../assets/icons/github.svg";
+import LinkedSVG from "../../assets/icons/linkedin.svg";
+import MailSVG from "../../assets/icons/mail.svg";
+import SkillCloud from "../../components/SkillCloud";
 
 export default function Home() {
   return (
@@ -39,14 +42,14 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.22, duration: 0.5 }}
             >
-              <a href="https://github.com/prakharagrawal10" target="_blank" rel="noopener noreferrer" className={styles.socialIcon} aria-label="GitHub">
-                <FaGithub />
+              <a href="https://github.com/prakharagrawal10" target="_blank" rel="noopener noreferrer" className={`${styles.socialIcon} ${styles.socialGit}`} aria-label="GitHub">
+                <img src={GitHubSVG} alt="github" className={styles.socialSvg} />
               </a>
-              <a href="https://www.linkedin.com/in/prakhar-agrawal-625398286" target="_blank" rel="noopener noreferrer" className={styles.socialIcon} aria-label="LinkedIn">
-                <FaLinkedin />
+              <a href="https://www.linkedin.com/in/prakhar-agrawal-625398286" target="_blank" rel="noopener noreferrer" className={`${styles.socialIcon} ${styles.socialLinked}`} aria-label="LinkedIn">
+                <img src={LinkedSVG} alt="linkedin" className={styles.socialSvg} />
               </a>
-              <a href="mailto:prakhar.agra10@gmail.com" className={styles.socialIcon} aria-label="Email">
-                <FaEnvelope />
+              <a href="mailto:prakhar.agra10@gmail.com" className={`${styles.socialIcon} ${styles.socialMail}`} aria-label="Email">
+                <img src={MailSVG} alt="email" className={styles.socialSvg} />
               </a>
             </motion.div>
 
@@ -56,9 +59,8 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.28, duration: 0.5 }}
             >
-              <div className={styles.stat}><strong>6</strong><span>Projects</span></div>
+              <div className={styles.stat}><strong>10+</strong><span>Projects</span></div>
               <div className={styles.stat}><strong>2</strong><span>Internships</span></div>
-              <div className={styles.stat}><strong>3</strong><span>Languages</span></div>
             </motion.div>
 
             <motion.div
@@ -74,6 +76,9 @@ export default function Home() {
                 Get in touch
               </Link>
             </motion.div>
+            <div className={styles.skillLeftWrap}>
+              <SkillCloud />
+            </div>
           </div>
 
           <div className={styles.heroMedia}>
@@ -154,6 +159,53 @@ export default function Home() {
               Read more
             </Link>
           </article>
+        </div>
+      </section>
+
+  <section className={`${styles.section} ${styles.highlightsSection}`}>
+        <h2 className={styles.sectionTitle}>Highlights</h2>
+        <div className={styles.highlightsGrid}>
+          <div className={styles.highlightCard}>
+            <h4>Production ML Prototype</h4>
+            <p>Delivered a model integrated with a React frontend and Flask API.</p>
+          </div>
+          <div className={styles.highlightCard}>
+            <h4>Scalable APIs</h4>
+            <p>Designed REST APIs with caching and rate limiting for real-world load.</p>
+          </div>
+          <div className={styles.highlightCard}>
+            <h4>Data Pipelines</h4>
+            <p>Built ETL pipelines for feature extraction and model training workflows.</p>
+          </div>
+          <div className={styles.highlightCard}>
+            <h4>Realtime Demos</h4>
+            <p>Computer-vision demos with OpenCV and lightweight CNNs for fast inference.</p>
+          </div>
+        </div>
+      </section>
+
+      <section className={`${styles.section} ${styles.techSection}`}>
+        <h2 className={styles.sectionTitle}>Tech stack</h2>
+        <div className={styles.techRow}>
+          <span className={styles.techBadge}>Python</span>
+          <span className={styles.techBadge}>PyTorch</span>
+          <span className={styles.techBadge}>TensorFlow</span>
+          <span className={styles.techBadge}>React</span>
+          <span className={styles.techBadge}>Node.js</span>
+          <span className={styles.techBadge}>Docker</span>
+          <span className={styles.techBadge}>SQL</span>
+        </div>
+      </section>
+
+      <section className={`${styles.sectionAlt} ${styles.ctaBanner}`}>
+        <div className={styles.ctaInner}>
+          <div>
+            <h3>Ready to build something together?</h3>
+            <p className={styles.cardText}>I build production-ready ML and web apps — let’s talk about your idea.</p>
+          </div>
+          <div>
+            <Link to="/contact" className={styles.ctaPrimary}>Contact me</Link>
+          </div>
         </div>
       </section>
 
