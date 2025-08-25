@@ -11,6 +11,8 @@
 .ctaRow{display:flex;gap:12px}
 .socials{display:flex;gap:12px;margin-bottom:14px}
 .socials a{color:var(--muted);text-decoration:none;border-bottom:1px dashed rgba(255,255,255,0.04);padding-bottom:2px}
+.socialIcon{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,0.02);color:var(--muted);transition:transform 180ms ease,background 180ms ease}
+.socialIcon:hover{transform:translateY(-4px);background:rgba(255,255,255,0.035);color:#fff}
 .statsRow{display:flex;gap:12px;margin-bottom:18px}
 .stat{background:rgba(255,255,255,0.02);padding:8px 12px;border-radius:8px;text-align:center}
 .stat strong{display:block;font-size:16px}
@@ -18,6 +20,7 @@
 .ctaGhost{border:1px solid rgba(255,255,255,0.08);color:#e6eef3;padding:10px 16px;border-radius:8px;text-decoration:none}
 .heroMedia{width:360px;flex-shrink:0}
 .heroImg{width:100%;height:auto;border-radius:12px;display:block}
+.heroMedia img{box-shadow:0 8px 30px rgba(2,6,23,0.6)}
 
 /* entrance animations */
 .enterUp{animation:enterUp 700ms cubic-bezier(.2,.9,.2,1) both}
